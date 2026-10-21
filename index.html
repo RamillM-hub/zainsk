@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D-дашборд цеха бетонных блоков (Демо)</title>
+<style>
+:root{--bg:#eef1f4;--panel:#fff;--tx:#1d2329;--mut:#66727e;--bd:#d6dbe0;--ac:#e07b1a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#20252b;--panel:#2b3138;--tx:#e8ecf0;--mut:#9aa6b1;--bd:#3d454e}}
+html,body{height:100%;margin:0}body{background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#cv{position:fixed;inset:0}
+.p{position:absolute;background:var(--panel);border-radius:14px;padding:10px 12px;box-shadow:0 6px 24px rgba(20,30,40,.14)}
+#top{left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;overflow-x:auto}
+.k{min-width:88px;flex:none}.k b{display:block;font-size:18px;white-space:nowrap}.k span{color:var(--mut);font-size:11px;white-space:nowrap}
+.demo{background:var(--ac);color:#fff;border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600}
+#card{right:8px;top:calc(84px + env(safe-area-inset-top,0px));width:260px;max-width:calc(100% - 16px);border-left:5px solid var(--c,#e07b1a)}
+#card h3{margin:0 0 6px;font-size:15px}#card div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid var(--bd)}
+#card div span:first-child{color:var(--mut)}#card div span:last-child{font-weight:600;text-align:right}
+.bar{height:6px;border-radius:3px;background:var(--bd);margin-top:8px;overflow:hidden;display:block!important;padding:0!important}.bar i{display:block;height:100%;background:var(--c,#e07b1a)}
+#ctl{left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 16px)}
+button,select{font:inherit;color:var(--tx);background:transparent;border:1px solid var(--bd);border-radius:8px;padding:6px 10px;cursor:pointer}
+.lb:not(.co){display:none!important}.lb.sm{padding:2px 7px;font-size:10px}.lb.sm span{display:none}.lb.sm b{font-size:11px}.lb{position:absolute;transform:translate(-50%,-100%);margin-top:-12px;background:var(--panel);border-radius:10px;padding:4px 9px;box-shadow:0 4px 14px rgba(20,30,40,.18);font-size:11px;line-height:1.25;pointer-events:none;white-space:nowrap;border-left:4px solid var(--c)}
+.lb b{display:block;font-size:12px}.lb span{color:var(--mut)}.lb::after{content:"";position:absolute;left:50%;bottom:-12px;width:1px;height:12px;background:var(--mut)}
+</style></head><body>
+<div id="cv"></div><div class="p" id="top"></div>
+<div class="p" id="card"></div>
+<div class="p" id="ctl"><button id="lv">Сейчас</button><button id="pl">⏸</button><input id="sl" type="range" min="0" max="1439" value="420" style="width:130px"><select id="sp"><option value="10">×1</option><option value="30">×3</option><option value="60">×6</option></select><select id="sc"><option value="bp">Здание + приямок</option><option value="bb">Два здания</option><option value="pp">Два приямка</option><option value="b-">Только здание</option><option value="-p">Только приямок</option><option value="pb">Приямок + здание</option><option value="p-">Только приямок (пост 1)</option><option value="--">Нет отливки</option></select><button id="b1">Изометрия</button><button id="b2">Сверху</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+loadData().then(function(d){window.DATA=d.data;window.BADGE=d.data.demo?'Демо':'Данные';
+  if(d.warn){document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#fff3cd;color:#664d03;padding:8px 14px;border-radius:10px;font:13px system-ui;z-index:9;box-shadow:0 4px 14px rgba(0,0,0,.2)">'+d.warn+'</div>')}
+  var s=document.createElement('script');s.src='app.js';document.body.appendChild(s);
+  if(CONFIG.REFRESH_MIN>0)setTimeout(function(){location.reload()},CONFIG.REFRESH_MIN*60000)});
+</script>
+</body></html>
