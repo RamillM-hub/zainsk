@@ -20,8 +20,8 @@ const DEMO_ROWS=[
 function norm(s){s=(s||"").trim().toLowerCase();return s==="готово"||s==="в работе"||s==="не требуется"?s:"не начато"}
 function buildItems(rows){var items=[],ord="",obj="";
   rows.forEach(function(r){if((r[0]||"").trim())ord=r[0].trim();if((r[1]||"").trim())obj=r[1].trim();
-    var c=(r[2]||"").trim();if(!c||!ord)return;var kind=/^здан/i.test(c)?"b":/^при/i.test(c)?"p":null;if(!kind)return;
-    var m=c.match(/\d+/),sh=(kind=="b"?"З":"П")+(m?m[0]:"");
+    var c=(r[2]||"").trim();if(!c||!ord)return;var kind=/^(здан|блок)/i.test(c)?"b":/^при/i.test(c)?"p":null;if(!kind)return;
+    var m=c.match(/\d+/),sh=(kind=="b"?(/^блок/i.test(c)?"Б":"З"):"П")+(m?m[0]:"");
     items.push({order:ord,obj:obj,name:c,label:ord+" "+sh,kind:kind,dims:(r[3]||"").trim(),
       st:{walls:norm(r[4]),base:norm(r[5]),inner:norm(r[6]),outer:norm(r[7]),fin:norm(kind=="b"?r[8]:r[9]),ship:norm(r[10])}})});
   return items}
@@ -64,7 +64,7 @@ function fetchRows(){
 function fetchRaw(){return fetchRows().then(function(r){return r.raw})}
 function loadData(){
   if(!CONFIG.SHEET_ID&&!CONFIG.API_URL)return Promise.resolve(mk(DEMO_ROWS,true));
-  return fetchRows().then(function(r){var d=mk(r.rows,false);if(!d.data.items.length)throw new Error("в таблице нет строк с составом («Здание…» или «Приямок…»)");d.raw=r.raw;d.src=r.src;return d})
+  return fetchRows().then(function(r){var d=mk(r.rows,false);if(!d.data.items.length)throw new Error("в таблице нет строк с составом («Блок…», «Здание…» или «Приямок…»)");d.raw=r.raw;d.src=r.src;return d})
   .catch(function(e){return mk(DEMO_ROWS,true,"Не удалось прочитать Google Таблицу ("+e.message+"). Показаны демо-данные.")});
 }
 
