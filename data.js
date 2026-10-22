@@ -55,11 +55,16 @@ function parseCSV(t){var r=[],row=[],f="",q=false;
   if(f!==""||row.length){row.push(f);r.push(row)} return r}
 function mk(rows,demo,warn){var items=buildItems(rows),plan=buildPlan(items);
   return{data:{demo:demo,rebar:DEMO.rebar,items:items,plan:plan,scenario:plan.scenario},warn:warn}}
-function sheetURL(){return "https://docs.google.com/spreadsheets/d/"+CONFIG.SHEET_ID+"/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent(CONFIG.SHEET_ORDERS)+"&_="+Date.now()}
-function fetchRaw(){return fetch(sheetURL(),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text()})}
+function sheetURL(){var n=Date.now();return "https://docs.google.com/spreadsheets/d/"+CONFIG.SHEET_ID+"/gviz/tq?tqx=out:csv;reqId:"+n+"&sheet="+encodeURIComponent(CONFIG.SHEET_ORDERS)+"&headers=1&_="+n}
+// Читает строки таблицы: через Apps Script (если задан API_URL, всегда свежие данные) или через gviz (Google может отдавать кэш)
+function fetchRows(){
+  if(CONFIG.API_URL){var u=CONFIG.API_URL+(CONFIG.API_URL.indexOf("?")>=0?"&":"?")+"t="+Date.now();
+    return fetch(u,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(j){if(!j||!j.rows)throw new Error("нет данных в ответе Apps Script");var rows=j.rows.slice(1);return{raw:JSON.stringify(rows),rows:rows,src:"Apps Script"}})}
+  return fetch(sheetURL(),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}).then(function(t){return{raw:t,rows:parseCSV(t).slice(1),src:"Google"}})}
+function fetchRaw(){return fetchRows().then(function(r){return r.raw})}
 function loadData(){
-  if(!CONFIG.SHEET_ID)return Promise.resolve(mk(DEMO_ROWS,true));
-  return fetchRaw().then(function(t){var d=mk(parseCSV(t).slice(1),false);if(!d.data.items.length)throw new Error("в листе «"+CONFIG.SHEET_ORDERS+"» нет строк с составом");d.raw=t;return d})
+  if(!CONFIG.SHEET_ID&&!CONFIG.API_URL)return Promise.resolve(mk(DEMO_ROWS,true));
+  return fetchRows().then(function(r){var d=mk(r.rows,false);if(!d.data.items.length)throw new Error("в таблице нет строк с составом («Здание…» или «Приямок…»)");d.raw=r.raw;d.src=r.src;return d})
   .catch(function(e){return mk(DEMO_ROWS,true,"Не удалось прочитать Google Таблицу ("+e.message+"). Показаны демо-данные.")});
 }
 

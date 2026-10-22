@@ -40,12 +40,18 @@ button,select{touch-action:manipulation}
 <script src="config.js"></script>
 <script src="data.js"></script>
 <script>
+function hash(s){var x=5381;for(var i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return(x>>>0).toString(16).slice(-5)}
+function hm(){var n=nowMin();return String(Math.floor(n/60)).padStart(2,'0')+':'+String(Math.floor(n%60)).padStart(2,'0')}
 loadData().then(function(d){window.DATA=d.data;window.BADGE=d.data.demo?'Демо':'Данные';
   if(d.warn){document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#fff3cd;color:#664d03;padding:8px 14px;border-radius:10px;font:13px system-ui;z-index:9;box-shadow:0 4px 14px rgba(0,0,0,.2)">'+d.warn+'</div>')}
   var s=document.createElement('script');s.src='app.js';document.body.appendChild(s);
-  var up=document.getElementById('upd');function hm(){var n=nowMin();return String(Math.floor(n/60)).padStart(2,'0')+':'+String(Math.floor(n%60)).padStart(2,'0')}
-  if(CONFIG.SHEET_ID&&!d.warn){window.RAW=d.raw;up.textContent='Таблица: данные на '+hm();
-    if(CONFIG.REFRESH_MIN>0)setInterval(function(){fetchRaw().then(function(t){if(t!==window.RAW){up.textContent='Таблица изменилась, обновляю…';location.reload()}else up.textContent='Таблица: проверено в '+hm()+', без изменений'}).catch(function(){up.textContent='Таблица: нет связи, проверка в '+hm()})},CONFIG.REFRESH_MIN*60000)}
-  else{up.textContent=CONFIG.SHEET_ID?'Демо-данные: таблица не прочиталась':'Демо-данные (таблица не подключена)';if(CONFIG.SHEET_ID&&CONFIG.REFRESH_MIN>0)setTimeout(function(){location.reload()},CONFIG.REFRESH_MIN*60000)}});
+  var up=document.getElementById('upd'),live=(CONFIG.SHEET_ID||CONFIG.API_URL)&&!d.warn;
+  if(live){window.RAW=d.raw;var changed=hm(),n=d.data.items.length;
+    var show=function(t){up.textContent='Таблица ('+d.src+'): '+t+' · изделий '+n+' · код '+hash(window.RAW)+' · изменена '+changed};
+    show('загружена в '+hm());up.style.pointerEvents='auto';up.style.cursor='pointer';up.title='Нажмите, чтобы проверить таблицу сейчас';
+    var check=function(){fetchRaw().then(function(t){if(t!==window.RAW){up.textContent='Таблица изменилась, обновляю…';location.reload()}else show('проверено в '+hm()+', без изменений')}).catch(function(){up.textContent='Таблица: нет связи, проверка в '+hm()})};
+    up.onclick=check;
+    if(CONFIG.REFRESH_MIN>0){setInterval(check,CONFIG.REFRESH_MIN*60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)check()})}}
+  else{up.textContent=(CONFIG.SHEET_ID||CONFIG.API_URL)?'Демо-данные: таблица не прочиталась':'Демо-данные (таблица не подключена)';if((CONFIG.SHEET_ID||CONFIG.API_URL)&&CONFIG.REFRESH_MIN>0)setTimeout(function(){location.reload()},CONFIG.REFRESH_MIN*60000)}});
 </script>
 </body></html>
