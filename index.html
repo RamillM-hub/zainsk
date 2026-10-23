@@ -39,7 +39,7 @@ button,select{font:inherit;color:var(--tx);background:transparent;border:1px sol
 .pr{padding:8px 9px;border-radius:10px;margin-bottom:5px;background:rgba(127,140,152,.09)}
 .nb{display:inline-block;background:#374151;color:#fff;border-radius:6px;padding:0 7px;font-size:12px;font-weight:700;margin-right:6px}
 .pr .t{font-weight:600}.pr .it{color:var(--mut);font-size:12px;margin:2px 0 5px}.pr .m{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut);margin-top:4px}
-.pr .bar{margin-top:0}.empty{padding:14px 10px;color:var(--mut);font-size:12px}
+.pr .bar{margin-top:0}#ptabs{display:none;gap:6px;padding:6px 8px 0;flex:none}#ptabs button{padding:3px 10px;font-size:12px;min-height:0}.dd{font-size:11px;color:var(--mut);margin:-2px 0 5px}.dd b{color:var(--tx)}.empty{padding:14px 10px;color:var(--mut);font-size:12px}
 .src{padding:7px 12px;border-top:1px solid var(--bd);font-size:11px;color:var(--mut);flex:none}
 button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 
@@ -56,7 +56,7 @@ button,select{touch-action:manipulation}
 <div id="cv"></div><div class="p" id="top"></div>
 <div class="p" id="ord"><div class="ph"><span>Заказы<small id="oc"></small></span><button class="x" id="ox" title="Скрыть">×</button></div><div id="olist"></div><div id="lg"></div></div>
 <div id="rt"><div class="p" id="card"></div>
-<div class="p" id="plan"><div class="ph"><span>План на день<small id="pd"></small></span><button class="x" id="px" title="Скрыть">×</button></div><div id="plist"></div><div class="src">Берётся из таблицы: ячейки со статусом «В работе»</div></div></div>
+<div class="p" id="plan"><div class="ph"><span>План на день<small id="pd"></small></span><button class="x" id="px" title="Скрыть">×</button></div><div id="ptabs"><button data-d="0" class="on">Сегодня</button><button data-d="1">Вчера</button></div><div id="plist"></div><div class="src" id="psrc"></div></div></div>
 <div class="p" id="ctl"><button id="lv">Сейчас</button><button id="pl">⏸</button><input id="sl" type="range" min="0" max="1439" value="420" style="width:130px"><select id="sp"><option value="10">×1</option><option value="30">×3</option><option value="60">×6</option></select><button id="tg">Подписи</button><button id="bo">Заказы</button><button id="bp">План дня</button><button id="b1">Изометрия</button><button id="b2">Сверху</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>

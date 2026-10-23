@@ -228,11 +228,12 @@ const WT=TB.filter(r=>r.kind=='wall');
 [rcPB.slabs[0],rcPA.slabs[0],rr.slabs[0],...WT[0].slabs,...WT[1].slabs,...WT[2].slabs,...WT[3].slabs,...WT[4].slabs,...WT[5].slabs].forEach((o,k)=>{const a=780+k*90/11,b=a+90/11,r=o.rc;POUR.push({o,a,b,p0:k?a+.45*(b-a):a,x:o.cx-4.6,z:o.cz+o.zo-2});r.pa=Math.min(r.pa==null?1e9:r.pa,a);r.pb=Math.max(r.pb==null?0:r.pb,b)});
 TB.forEach(rc=>{rc.d.r=()=>stRows(rc,rc.d)});
 function opText(r,m){const a=r.pa,b=r.pb,w=r.kind=='post',rf=r.kind=='roof';if(!r.on)return[rf?'Крыша не нужна (приямок или нет заказа)':'Нет заказа, не задействован',0];
+  if(m<555&&!r.onM)return[rf?'Крыша не нужна':'Нет изделия для переноса',0];if(m>=555&&!r.pourOn)return[rf?'Крыша не нужна':'Нет заказа на отливку',0];
   if(m<465)return[w?'Готовый блок, ждёт смены':rf?'Готовая крыша, ждёт смены':'Готовая стена, ждёт смены',1];
   if(m<510)return[w?'Блок уходит в основной цех':rf?'Крыша ждёт переноса':'Подъём стола, стена уходит на перенос',cl((m-465)/45)];
   if(m<555)return[w?'Приём стен, сборка контура'+(r.roof?' и крыши':''):rf?'Перенос крыши на здание':'Стол опущен, свободен',cl((m-510)/45)];
   if(m<570)return['Ждёт армирования',1];if(m<720)return['Армирование'+(w?' основания':''),cl((m-570)/150)];if(m<780)return['Обед',1];if(m<a)return['Арматура готова, ждёт бетон',1];if(m<b)return['Заливка бетона',cl((m-a)/(b-a))];return['Обогрев, набор прочности',cl((m-870)/150)]}
-function stRows(r,d){const m=ST.m,o=opText(r,m);d.p=Math.round(o[1]*100);return[['Заказ',r.ord],['Изделие',r.what],['Габариты',r.dim],['Время',fmt(m)],['Операция',o[0]],['Прогресс',d.p+' %']]}
+function stRows(r,d){const m=ST.m,o=opText(r,m),t=r.ordM!==undefined;d.p=Math.round(o[1]*100);return[['Заказ',t?(m<555?r.ordM:r.ordP):r.ord],['Изделие',r.what],['Габариты',t?(m<555?r.dimM:r.dimP):r.dim],['Время',fmt(m)],['Операция',o[0]],['Прогресс',d.p+' %']]}
 function along(p,q,u){if(Math.abs(p.x-q.x)<5)return{x:p.x+(q.x-p.x)*u,z:p.z+(q.z-p.z)*u};const A=Math.abs(p.z+24),Bb=Math.abs(q.x-p.x),C=Math.abs(q.z+24),T2=A+Bb+C;let d=u*T2;if(d<A)return{x:p.x,z:p.z+(-24-p.z)*d/A};d-=A;if(d<Bb)return{x:p.x+(q.x-p.x)*d/Bb,z:-24};d-=Bb;return{x:q.x,z:-24+(q.z+24)*d/C}}
 function truckPose(m){const s=POUR,f=s[0],l=s[s.length-1],ZO=Z(900);if(m<765||m>=885||!s.length)return null;if(m<f.a)return{x:f.x,z:ZO+(f.z-ZO)*sm((m-765)/(f.a-765))};
   for(let k=0;k<s.length;k++){const t=s[k];if(m>=t.b)continue;const d=t.b-t.a;if(k>0&&m<t.a+.45*d)return along(s[k-1],t,sm((m-t.a)/(.45*d)));return{x:t.x,z:t.z}}return{x:l.x,z:l.z+(ZO-l.z)*sm((m-l.b)/15)}}
@@ -245,11 +246,11 @@ function applySim(m,dt){const th=m<465?0:m<480?1.31*sm((m-465)/15):m<485?1.31:m<
   POUR.forEach(it=>{const o=it.o,pj=cl((m-it.p0)/(it.b-it.p0)),nv=Math.ceil(r*o.rebar.length-1e-6),hh=Math.max(.02,pj);o.rebar.forEach((q,k)=>q.visible=k<nv);o.conc.visible=pj>0;o.conc.scale.y=hh;o.conc.position.y=.5+.11*hh;o.conc.material.color.copy(WET).lerp(DRY,p3);o.conc.material.emissive.setRGB(.3*ht,.1*ht,0);o.heat.material.color.copy(HC).lerp(HEAT,ht)});
   TS.forEach(p=>placeWall(p,m));placeBlock(window.POSTG.b,PTH[0],m);placeBlock(window.POSTG.p,PTH[1],m);
   const sf=m<570?1:m<720?1-cl((m-570)/150):m<870?0:cl((m-870)/120);
-  TB.forEach(rc=>{if(rc.kind=='wall'){rc.tl.rotation.z=-th;const f=Math.max(.02,sf);rc.stack.visible=sf>.02;rc.stack.scale.y=f;rc.stack.position.y=.4*f}
+  TB.forEach(rc=>{if(rc.kind=='wall'){rc.tl.rotation.z=rc.onM?-th:0;const f=Math.max(.02,sf);rc.stack.visible=sf>.02&&!!rc.pourOn;rc.stack.scale.y=f;rc.stack.position.y=.4*f}
     rc.w.forEach((w,wi)=>{let show=false,sc=1,x=rc.cx+(wi?1.95:-1.95),z=rc.cz;
       if(m>=465&&m<570){show=true;z+=Math.sin(ST.a*.08+rc.i+wi*3)*1.4}else if(m>=570&&m<720){show=true;sc=.65;z+=Math.sin(ST.a*.12+rc.i*1.3+wi*3)*2.2}
       else if(m>=780&&m<873){show=true;z+=(m>=rc.pa-5&&m<=rc.pb+3)?Math.sin(ST.a*.35+wi*3)*2.2:(wi?-1:1)*1.2}else if(rc.kind=='wall'&&m>=870&&m<990){show=true;sc=.8;x=rc.cx+2.4+(wi?.7:-.7);z+=Math.sin(ST.a*.1+wi*3)*1.5}
-      w.visible=show;if(show){w.position.set(x,0,z);w.scale.y=sc}})});
+      if(m>=570&&!rc.pourOn)show=false;w.visible=show;if(show){w.position.set(x,0,z);w.scale.y=sc}})});
   const tp=truckPose(m);truck.visible=!!tp;if(tp){truck.position.set(tp.x,0,tp.z);const pn=POUR.some(it=>m>=it.p0&&m<it.b);stream.visible=pn;drum.rotation.z+=dt*(pn?2.5:1.2)}}
 function stepSim(){const n=performance.now(),dt=Math.min(.1,(n-ST.last)/1000);ST.last=n;if(ST.live){ST.m=nowMin();ST.a+=dt*10}else{ST.a=ST.m;if(ST.play){ST.m+=dt*ST.spd;if(ST.m>1080)ST.m=420}}applySim(ST.m,dt);ST.ui+=dt;
   hallSim(ST.m,dt);
@@ -299,25 +300,28 @@ function callout(t,s,c,x,y,z,sm2){const l=label(t,s||'',c,x,y,z);l.e.classList.a
 const SC={b:0,p:0},PATHS=[null,null],PREVT=DATA.plan.prevT;
 const BG=[{b:window.POSTG.b,p:pit(X(326),Z(420),Math.PI/2,PD(9,['Приямок (прошлая смена)',[['Этап','Выгрузка в основной цех']]]),.5,false)},{b:building(X(326),Z(577),Math.PI/2,BD(10,['Здание (прошлая смена)',[['Этап','Выгрузка в основной цех']]]),.5,false),p:window.POSTG.p}];
 const CL2={t:[WT[1],WT[4]].map(r=>callout('','','#e8b32a',r.cx,2.3,r.cz)),p:[rcPA,rcPB].map(r=>callout('','','#6b747d',r.cx,4.8,r.cz)),r:[rr,r2].map(r=>callout('','','#9aa0a6',r.cx,1.6,r.cz))},BGC=[callout(ord(9),'','#9aa0a6',0,0,0,1),callout(ord(10),'','#9aa0a6',0,0,0,1)];
-function rebuildPour(){POUR.length=0;TB.forEach(r=>{r.pa=1e9;r.pb=0});const L=[];if(r2.on)L.push(r2.slabs[0]);if(rcPB.on)L.push(rcPB.slabs[0]);if(rcPA.on)L.push(rcPA.slabs[0]);if(rr.on)L.push(rr.slabs[0]);WT.forEach(t=>{if(t.on)L.push(...t.slabs)});
+function rebuildPour(){POUR.length=0;TB.forEach(r=>{r.pa=1e9;r.pb=0});const L=[];if(r2.pourOn)L.push(r2.slabs[0]);if(rcPB.pourOn)L.push(rcPB.slabs[0]);if(rcPA.pourOn)L.push(rcPA.slabs[0]);if(rr.pourOn)L.push(rr.slabs[0]);WT.forEach(t=>{if(t.pourOn)L.push(...t.slabs)});
   const n=Math.max(1,L.length);L.forEach((o,k)=>{const a=780+k*90/n,b=a+90/n,r=o.rc;POUR.push({o,a,b,p0:k?a+.45*(b-a):a,x:o.cx-4.6,z:o.cz+o.zo-2});r.pa=Math.min(r.pa,a);r.pb=Math.max(r.pb,b)})}
-function applyScenario(code){const sc=[0,1].map(i=>code[i]=='b'||code[i]=='p'?code[i]:null);
-  [[PA,rcPA,sc[0],ord(11),rr],[PB,rcPB,sc[1],ord(12),r2]].forEach(([P,post,t,od,rf],pi)=>{P.type=t;P.H=t=='b'?2.92:1.7;post.on=t!=null;post.ord=od;post.what=t=='b'?'Основание здания':'Основание приямка';post.dim=t=='b'?'5000×2500×3070 мм':'5000×2500×1700 мм';rf.on=t=='b';
-    WT.filter(w=>(w.i>2?1:0)==pi).forEach(w=>{w.on=t!=null;w.ord=od;w.dim=(w.short?'2500':'5000')+'×'+(t=='b'?'2920':'1700')+'×150 мм'+(w.short?' (×2)':'')})});
+const SCN={p:[null,null],w:[null,null]},dimW=(w,t)=>(w.short?'2500':'5000')+'×'+(t=='b'?'2920':'1700')+'×150 мм'+(w.short?' (×2)':'');
+function applyScenario(code,wcode){wcode=wcode||code;const sc=[0,1].map(i=>code[i]=='b'||code[i]=='p'?code[i]:null),ws=[0,1].map(i=>wcode[i]=='b'||wcode[i]=='p'?wcode[i]:null);SCN.p=sc;SCN.w=ws;
+  [[PA,rcPA,sc[0],ord(11),rr],[PB,rcPB,sc[1],ord(12),r2]].forEach(([P,post,t,od,rf],pi)=>{P.type=t;P.H=t=='b'?2.92:1.7;post.on=post.onM=post.pourOn=t!=null;post.ord=od;post.what=t=='b'?'Основание здания':'Основание приямка';post.dim=t=='b'?'5000×2500×3070 мм':'5000×2500×1700 мм';const wt=ws[pi];rf.onM=t=='b';rf.pourOn=wt=='b';rf.on=rf.onM||rf.pourOn;rf.ordM=od;rf.ordP=orderFor(13+pi);rf.dimM=rf.dimP=rf.dim;
+    WT.filter(w=>(w.i>2?1:0)==pi).forEach(w=>{w.onM=t!=null;w.pourOn=wt!=null;w.on=w.onM||w.pourOn;w.ordM=od;w.ordP=orderFor(13+pi);w.dimM=dimW(w,t);w.dimP=dimW(w,wt);w.ord=od;w.dim=w.dimM})});
   TS.forEach(p=>{if(p.roof){const P=p.rc===rr?PA:PB;p.p1.set(P.x,.5+P.H+.11,P.z)}else{const P=p.rc.i>2?PB:PA,sh=p.rc.short,j=p.rc.slabs.indexOf(p.s);p.p1=sh?vv(P.x,.5+P.H/2,P.z+(j?1:-1)*2.425):vv(P.x+(p.rc.i%3==0?-1:1)*1.175,.5+P.H/2,P.z);p.sx=P.H/2.5}});
-  TB.forEach(rc=>{if(!rc.on)rc.slabs.forEach(s=>{s.rebar.forEach(q=>q.visible=false);s.conc.visible=false;s.conc.material.emissive.setRGB(0,0,0);s.heat.material.color.copy(HC)})});
+  TB.forEach(rc=>{if(!rc.pourOn)rc.slabs.forEach(s=>{s.rebar.forEach(q=>q.visible=false);s.conc.visible=false;s.conc.material.emissive.setRGB(0,0,0);s.heat.material.color.copy(HC)})});
   const cnt={b:0,p:0};PREVT.forEach((t,pi)=>{if(!t)return;const idx=cnt[t]++,z=t=='b'?Z(262+idx*28):Z(475+idx*28),y0=pi?Z(577):Z(420);PATHS[pi]=[[X(326),y0],[X(432),y0],[X(432),Z(560)],[X(548),Z(560)],[X(548),z],[X(502),z]]});
-  SC.b=cnt.b;SC.p=cnt.p;window.WTOT=WT.filter(w=>w.on).reduce((s,w)=>s+w.slabs.length,0);K[0]=['На постах основания',sc.filter(t=>t=='b').length+' зд. · '+sc.filter(t=>t=='p').length+' приям.'];
-  CL2.t.forEach((l,k)=>{const P=k?PB:PA,r=WT[k?4:1];l.off=!r.on;l.b.textContent='Заказ '+r.ord;l.s.textContent=P.type=='b'?'Стены здания':'Стены приямка'});
+  SC.b=cnt.b;SC.p=cnt.p;window.WTOT=WT.filter(w=>w.pourOn).reduce((s,w)=>s+w.slabs.length,0);K[0]=['На постах основания',sc.filter(t=>t=='b').length+' зд. · '+sc.filter(t=>t=='p').length+' приям.'];
   CL2.p.forEach((l,k)=>{const P=k?PB:PA,r=k?rcPB:rcPA;l.off=!r.on;l.b.textContent='Заказ '+r.ord;l.s.textContent=P.type=='b'?'Основание здания':'Основание приямка'});
-  CL2.r.forEach((l,k)=>{const r=k?r2:rr;l.off=!r.on;l.b.textContent='Заказ '+r.ord;l.s.textContent='Крыша здания'});rebuildPour();renderCard()}
+  rebuildPour();renderCard()}
+function setT(e,t){if(e.textContent!==t)e.textContent=t}
+function clSim(m){const mo=m<555;CL2.t.forEach((l,k)=>{const r=WT[k?4:1],t=mo?SCN.p[k]:SCN.w[k];l.off=!t;setT(l.b,'Заказ '+(mo?r.ordM:r.ordP));setT(l.s,t=='b'?'Стены здания':'Стены приямка')});
+  CL2.r.forEach((l,k)=>{const r=k?r2:rr,t=mo?SCN.p[k]:SCN.w[k];l.off=t!='b';setT(l.b,'Заказ '+(mo?r.ordM:r.ordP));setT(l.s,'Крыша здания')})}
 function stgSim(){const S=window.STG||[];S.forEach(s=>{s.g.visible=!!s.data});[0,1,3,4].forEach(i=>{const a=S.find(s=>s.i==i&&s.j==0),b=S.find(s=>s.i==i&&s.j==1);if(!a)return;const o=[a,b].filter(s=>s.data);a.co.off=!o.length;a.co.b.textContent=o.map(s=>s.data.label).join(' · ');a.co.v.set(a.x,a.isB?3.6:2.2,o.length==1?o[0].z:(a.z+b.z)/2)})}
-function sceneSim(m){TS.forEach(p=>p.m.visible=p.rc.on);TB.forEach(rc=>{if(!rc.on){rc.w.forEach(w=>w.visible=false);if(rc.stack)rc.stack.visible=false;if(rc.tl&&rc.kind=='wall')rc.tl.rotation.z=0}});
+function sceneSim(m){clSim(m);TS.forEach(p=>p.m.visible=!!p.rc.onM);TB.forEach(rc=>{if(!rc.on){rc.w.forEach(w=>w.visible=false);if(rc.stack)rc.stack.visible=false;if(rc.tl&&rc.kind=='wall')rc.tl.rotation.z=0}});
   [PA,PB].forEach((P,pi)=>{['b','p'].forEach(t=>{const g=BG[pi][t],sh=PREVT[pi]===t;g.visible=sh;if(sh)placeBlock(g,PATHS[pi],m)});const g=PREVT[pi]?BG[pi][PREVT[pi]]:null;BGC[pi].off=!g;if(g)BGC[pi].v.set(g.position.x,g.position.y+(PREVT[pi]=='b'?3.6:2.2),g.position.z)});
   {const g0=PREVT[0]?BG[0][PREVT[0]]:null,g1=PREVT[1]?BG[1][PREVT[1]]:null;if(g0&&g1&&PREVT[0]==PREVT[1]&&Math.abs(g0.position.z-g1.position.z)<3&&Math.abs(g0.position.x-g1.position.x)<1){BGC[1].off=true;BGC[0].v.set((g0.position.x+g1.position.x)/2,g0.position.y+(PREVT[0]=='b'?3.6:2.2),(g0.position.z+g1.position.z)/2);BGC[0].b.textContent=ord(9)+' · '+ord(10)}else BGC[0].b.textContent=ord(9)}
   ITM.forEach(it=>{if(!it.data){it.g.visible=false;it.co.off=true;return}const g=it.g,b=it.kind=='b',pt=ITM.find(q=>q.row==it.row&&q.j!=it.j),both=g.visible&&pt.g.visible&&Math.abs(g.position.z-pt.g.position.z)<3&&Math.abs(g.position.x-pt.g.position.x)<1;
     if(it.j==1&&both){it.co.off=true;return}it.co.off=!g.visible;it.co.v.set(both?(g.position.x+pt.g.position.x)/2:g.position.x,g.position.y+(b?3.6:2.2),both?(g.position.z+pt.g.position.z)/2:g.position.z);it.co.b.textContent=both?it.ord+' · '+pt.ord:it.ord});stgSim()}
-applyScenario(DATA.scenario||'bp');
+applyScenario(DATA.scenario||'bp',DATA.wscenario||DATA.scenario||'bp');
 select(rcPA.g);const closeCard=()=>{if(ST.card)ST.card.ms.forEach(m=>m.material.emissive.setHex(0));ST.card=null;$('card').style.display='none'};$('card').onclick=e=>{if(e.target.classList.contains('cx'))closeCard()};$('tg').onclick=()=>document.body.classList.toggle('nolb');if(MOB)closeCard();
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
 (function loop(){requestAnimationFrame(loop);stepSim();ctl.update();ren.render(scene,cam);labels.forEach(l=>{const v=l.v.clone().project(cam);l.e.style.display=(v.z>1||l.off)?'none':'block';l.e.style.left=(v.x*.5+.5)*innerWidth+'px';l.e.style.top=(-v.y*.5+.5)*innerHeight+'px'})})();
