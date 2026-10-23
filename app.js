@@ -56,23 +56,23 @@ function meshPanel(cx,cz,len,alongX,h){const g=new THREE.PlaneGeometry(len,h||FH
 function fenceRun(x1,z1,x2,z2){const L=Math.hypot(x2-x1,z2-z1),n=Math.max(1,Math.round(L/2.75)),ax=Math.abs(x2-x1)>Math.abs(z2-z1);
   for(let i=0;i<=n;i++){const x=x1+(x2-x1)*i/n,z=z1+(z2-z1)*i/n;B2(.1,FH+.1,.1,BLUE,x,0,z)}
   const cx=(x1+x2)/2,cz=(z1+z2)/2;meshPanel(cx,cz,L,ax);B2(ax?L:.08,.08,ax?.08:L,BLUE,cx,FH,cz,{sh:false});B2(ax?L:.08,.08,ax?.08:L,BLUE,cx,.05,cz,{sh:false})}
-fenceRun(22,-36,22,8);fenceRun(22,8,26.5,8);fenceRun(30,8,36,8);
+fenceRun(22,-36,22,-5);fenceRun(22,-5,26.5,-5);fenceRun(30,-5,36,-5);
 // ворота 3,5 м в южной стороне
-[26.5,30].forEach(x=>B2(.14,FH+.2,.14,0x174a94,x,0,8));B2(3.5,.12,.12,0x174a94,28.25,FH+.1,8);
-[[26.65,28.25],[28.25,29.85]].forEach(a=>{const cx=(a[0]+a[1])/2;meshPanel(cx,8,1.6,true,FH-.2);B2(1.6,.08,.08,BLUE,cx,FH-.15,8,{sh:false});B2(1.6,.08,.08,BLUE,cx,.1,8,{sh:false})});
-sign('СКЛАД',2.6,.6,'#1f5fbf',28.25,FH+.65,8.1,0);
+[26.5,30].forEach(x=>B2(.14,FH+.2,.14,0x174a94,x,0,-5));B2(3.5,.12,.12,0x174a94,28.25,FH+.1,-5);
+[[26.65,28.25],[28.25,29.85]].forEach(a=>{const cx=(a[0]+a[1])/2;meshPanel(cx,-5,1.6,true,FH-.2);B2(1.6,.08,.08,BLUE,cx,FH-.15,-5,{sh:false});B2(1.6,.08,.08,BLUE,cx,.1,-5,{sh:false})});
+sign('СКЛАД',2.6,.6,'#1f5fbf',28.25,FH+.65,-4.9,0);
 
 // стеллажи: 5 рядов по 10 секций, 4 яруса (instanced)
 function inst(arr){const m=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),M(0xffffff,.8),arr.length),o=new THREE.Object3D(),c=new THREE.Color();arr.forEach((a,i)=>{o.position.set(a[0],a[1],a[2]);o.scale.set(a[3],a[4],a[5]);o.updateMatrix();m.setMatrixAt(i,o.matrix);m.setColorAt(i,c.setHex(a[6]))});m.castShadow=m.receiveShadow=true;m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;scene.add(m)}
-const RX=[35.2,31,29.8,25.8,24.6],Z0=-33.5,NB=10,BL=2.7,LV=[.3,1.6,2.9,4.2],rk=[];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const RX=[35.2,31,29.8],Z0=-33.5,NB=8,BL=2.7,LV=[.3,1.6,2.9,4.2],rk=[];let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
 RX.forEach(x=>{for(let i=0;i<=NB;i++)[-.5,.5].forEach(dx=>rk.push([x+dx,2.35,Z0+i*BL,.09,4.7,.09,0x2f62b0]));
   for(let i=0;i<NB;i++){const zc=Z0+i*BL+BL/2;LV.forEach(y=>{[-.5,.5].forEach(dx=>rk.push([x+dx,y,zc,.07,.14,BL,0xe07b1a]));
     [-.68,.68].forEach(dz=>{if(rnd()<.78){rk.push([x,y+.07+.06,zc+dz,1,.12,1.15,0xb98a52]);const h=.5+rnd()*.7,cc=[0xc9a46a,0xd8b57a,0xe8e8e8,0x3f7fd1,0xb98a52][Math.floor(rnd()*5)];rk.push([x,y+.13+h/2,zc+dz,.95,h,1.05,cc])}})})}});
 inst(rk);
 // паллеты у ворот
-[[27,5.2],[29.6,5.2],[28.3,3.6]].forEach(a=>{B2(1,.12,1.15,0xb98a52,a[0],0,a[1]);B2(.95,.7,1.05,0xd8b57a,a[0],.12,a[1])});
-B2(.15,.02,44,0xf2c500,27.2,0,-14,{sh:false});B2(.15,.02,44,0xf2c500,33.5,0,-14,{sh:false});
-label('Склад','огорожен синей сеткой · 5 рядов стеллажей','#1f5fbf',29,5.4,-20);
+[[27.2,-5.9],[28.6,-5.9]].forEach(a=>{B2(1,.12,1.15,0xb98a52,a[0],0,a[1]);B2(.95,.7,1.05,0xd8b57a,a[0],.12,a[1])});
+B2(.15,.02,31,0xf2c500,27.2,0,-20.5,{sh:false});B2(.15,.02,31,0xf2c500,33.5,0,-20.5,{sh:false});
+label('Склад','≈14 × 31 м · синяя сетка · 3 ряда стеллажей','#1f5fbf',29,5.4,-20);
 
 // --- ДВУХЭТАЖНЫЙ БЛОК у южной стены, во всю ширину цеха: 1 этаж раздевалки и столовая + проезд, 2 этаж офис ---
 const BX1=.4,BX2=36,BZ1=27,BZ2=36,H1=2.9,SL=.3,FL2=3.2,OX1=21.5,PX1=17.6,PX2=17.6;
@@ -195,7 +195,7 @@ function applySim(m,dt){tabs.forEach(o=>{const ph=phase(o.i,m),n=o.slabs.length;
 
 // показатели, карточка, управление
 const K=[['На постах основания','1 здание · 1 приямок'],['На складе','4 здания · 4 приямка'],['На покраске','6 зданий · 6 приямков']];
-function kpi(w,stage,clk){const KK=[['Время',clk],['На столах',stage],['Стен залито',w+' из '+(window.WTOT||8)],['Мин. остаток арматуры',minR+' %']].concat(K);$('top').innerHTML='<span class="demo">'+BADGE+'</span>'+KK.map(k=>'<div class="k"><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join('')}
+function kpi(w,stage,clk){const KK=[['Время',clk],['На столах',stage],['Стен залито',w+' из '+(window.WTOT||8)]].concat(K.filter(function(_,i){return i!=1}));$('top').innerHTML='<span class="demo">'+BADGE+'</span>'+KK.map(k=>'<div class="k"><b>'+k[1]+'</b><span>'+k[0]+'</span></div>').join('')}
 function renderCard(){const g=ST.card;if(!g)return;const d=g.d,rows=typeof d.r=='function'?d.r():d.r;$('card').style.setProperty('--c',d.c);$('card').innerHTML='<h3><span class="cx">×</span>'+d.t+' <span class="demo">'+BADGE+'</span></h3>'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+r[1]+'</span></div>').join('')+(d.p?'<div class="bar"><i style="width:'+d.p+'%"></i></div>':'')}
 function select(g){if(ST.card)ST.card.ms.forEach(m=>m.material.emissive.setHex(0));ST.card=g;g.ms.forEach(m=>m.material.emissive.setHex(0x2a2a2a));$('card').style.display='block';renderCard()}
 const ray=new THREE.Raycaster(),mv=new THREE.Vector2();let dn;
